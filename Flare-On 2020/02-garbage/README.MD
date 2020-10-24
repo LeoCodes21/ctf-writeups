@@ -94,6 +94,8 @@ Notice the two `Module Name` values are blank. Perhaps this is the problem. If w
 
  ![Better decompilation](https://s.heyitsleo.io/ShareX/2020/10/ida_kNOWAIGM5J.png)
 
+## Part 4 - Endgame
+
  At this point, we have two options:
  1. Reverse engineer the flag generation
  2. Fix the EXE's manifest so we can run it
