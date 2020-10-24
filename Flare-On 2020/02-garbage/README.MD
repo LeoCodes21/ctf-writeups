@@ -172,6 +172,8 @@ char v10[0x68];
 
  ![New variables](https://s.heyitsleo.io/ShareX/2020/10/ida_G1KeLUavpQ.png)
 
+ The strings `nPTnaGLkIqdcQwvieFQKGcTGOTbfMjDNmvibfBDdFBhoPaBbtfQuuGWYomtqTFqvBSKdUMmciqKSGZaosWCSoZlcIlyQpOwkcAgw ` and `KglPFOsQDxBPXmclOpmsdLDEPMRWbMDzwhDGOyqAkVMRvnBeIkpZIhFznwVylfjrkqprBPAdPuaiVoVugQAlyOQQtxBNsTdPZgDH ` are copied into `v10` and `v11` respectively. These will become important later.
+
  Let's look at the next interesting bit of code:
  ```cpp
   v28 = 989990456;
@@ -200,4 +202,140 @@ With this in mind, let's change the type of `v28` from an `int` to a `char[20]`.
 
 We also have this to deal with:
 `sub_401000(&lpFileName, (int)&v12, 61, (int)v10, v4);`
-Now let's change the type of `v12` from an `int` to a `char[61]`. Recall that `v10` is an array of `0x68` characters. 
+Now let's change the type of `v12` from an `int` to a `char[61]`.
+
+\* Recall that `v10` is a _string_ (character array). The signature of `sub_401000` will need to be updated.
+
+Decompiling `sub_401000` yields the following pseudocode:
+
+```cpp
+_DWORD *__thiscall sub_401000(_DWORD *this, int a2, int a3, int a4, int a5)
+{
+  unsigned int v5; // edi
+
+  v5 = 0;
+  *this = a2;
+  this[1] = a3;
+  this[2] = a4;
+  this[3] = 102;
+  ... truncated for brevity
+  return this;
+}
+```
+
+This appears to be a constructor function that takes arguments. We can create a structure of length `0x10`, or 4 machine words. First, though, we should fix the signature. We can remove `a5` because it's never used, and also change the return type to `void`. Then we can consider the arguments.
+
+Consider this function call:
+`sub_401000(&lpFileName, (int)&v12, 61, (int)v10, v4);`
+
+We know that `&lpFileName` is an instance of our `0x10`-length structure. To be sure of this, we can check the stack-variable comments:
+```cpp
+  LPCSTR lpFileName; // [esp+10h] [ebp-138h]
+  char v8[104]; // [esp+20h] [ebp-128h]
+```
+Indeed, `0x138 - 0x128 = 0x10`.
+
+We also know that `&v12` is an array of 61 bytes (or 64, if you want to round up.)
+`61` is the length of the array, `v10` seems to be a decryption key, and `v4` is the unused 5th argument (it appears because of the incorrect constructor return type.)
+
+Remember the constructor code:
+```cpp
+  *this = a2;
+  this[1] = a3;
+  this[2] = a4;
+  this[3] = 102;
+```
+
+We can create a `decipher_ctx` structure as follows:
+```cpp
+struct decipher_ctx {
+    unsigned char* data;
+    unsigned int datalen;
+    unsigned char* key;
+    unsigned int keylen; // = 102 (we rounded up the array size to a multiple of 4)
+};
+```
+
+Our new signature for `sub_401000` is:
+`void __thiscall sub_401000(decipher_ctx *this, unsigned __int8 *data, int datalen, unsigned __int8 *key)`
+
+We can rename this function to `decipher_ctx::ctor`. The decompiled code makes much more sense now.
+
+```cpp
+void __thiscall decipher_ctx::ctor(decipher_ctx *this, unsigned char *data, unsigned int datalen, unsigned char *key)
+{
+  unsigned int i; // edi
+
+  i = 0;
+  this->data = data;
+  this->datalen = datalen;
+  this->key = key;
+  this->keylen = 102;
+  if ( datalen )
+  {
+    do
+    {
+      this->data[i] ^= this->key[i % this->keylen];
+      ++i;
+    }
+    while ( i < this->datalen );
+  }
+}
+```
+
+This is a simple XOR cipher. Nothing about it is particularly interesting.
+
+Going back to the main function, we now see code like this:
+`decipher_ctx::ctor((decipher_ctx *)&lpFileName, (unsigned __int8 *)v11, 20, (unsigned __int8 *)v9);`
+
+Let's change the type of the `lpFileName` variable to `decipher_ctx`, and rename it to something more meaningful (such as `ctx`.) We can also change `v8`, `v9` and `v11` to be arrays of **unsigned** `char` rather than signed.
+
+There is also a call to `sub_401045(&ctx);`. We can change the signature of this function from `char __thiscall sub_401045(_DWORD *this)` to `void __thiscall sub_401045(decipher_ctx*)`, as the supposed return value isn't ever used.
+
+The pseudocode listing makes it clear that this is just re-encrypting the data:
+
+```cpp
+void __thiscall sub_401045(decipher_ctx *this)
+{
+  unsigned int i; // esi
+
+  i = 0;
+  if ( this->datalen )
+  {
+    do
+    {
+      this->data[i] ^= this->key[i % this->keylen];
+      ++i;
+    }
+    while ( i < this->datalen );
+  }
+}
+```
+
+We can rename this to `decipher_ctx::reset`. Now we should have a much easier time understanding what's happening.
+
+Going back to `main`, we can rename some more variables:
+| Old variable name | New variable name |
+|-------------------|-------------------|
+| v8                | filedata_key      |
+| v9                | filename_key      |
+| v10               | filedata          |
+| v11               | filename          |
+
+Now we can work on reimplementing this cipher in Python. Since the code will mostly be a port of the C pseudocode, I won't put it in this document. You can find it [here](./decrypt.py). One new function was added to facilitate conversion from int arrays to byte arrays:
+
+```py
+def ints2bytes(int_array):
+    result = bytearray(len(int_array) * 4)
+    for i in range(len(int_array)):
+        struct.pack_into('<I', result, i*4, int_array[i])
+    return result
+```
+
+Running the Python script gives us the results:
+```
+Filename: sink_the_tanker.vbs
+File contents: MsgBox("Congrats! Your key is: C0rruptGarbag3@flare-on.com")
+```
+
+And there we have it! Two different ways to solve the problem - which one would you have chosen?
