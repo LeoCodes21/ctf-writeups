@@ -96,7 +96,19 @@ $ olevba /d/Development/Flare-On\ 2020/4-report_for_writeup/report.xls
 
 ## Part 2 - Initial analysis
 
- As `olevba` indicated, the macro code is quite unusual. This is to be expected from malware. The code below implements a string deobfuscation function.
+Like most malicious Office documents, the macro code is obfuscated, with heavy use of hex strings.
+
+Looking for usages of this function, we immediately find something of interest:
+
+```vb
+    onzo = Split(F.L, ".")
+    ...
+    Set fudgel = GetObject(rigmarole(onzo(7)))
+```
+
+If you're unfamiliar with VBA syntax, `onzo(7)` will return the item at index 7 in the `onzo` array.
+
+The `rigmarole` function is shown below:
 
  ```vb
  Function rigmarole(es As String) As String
@@ -113,14 +125,6 @@ $ olevba /d/Development/Flare-On\ 2020/4-report_for_writeup/report.xls
     Next i
     rigmarole = furphy
 End Function
-```
-
-Looking for usages of this function, we immediately find something of interest:
-
-```vb
-    onzo = Split(F.L, ".")
-    ...
-    Set fudgel = GetObject(rigmarole(onzo(7)))
 ```
 
 To figure out what `F.L` is, we can search the `olevba` output with a regular expression:
@@ -222,10 +226,12 @@ Also note that we can replace `mf` with `%AppData%\Microsoft\stomp.mp3`. At leas
 
 ### P-code stomping
 
-Remember that warning?
+Remember that warning `olevba` gave us?
 > VBA Stomping was detected
 
-Turns out `olevba` was correct. If we read the decompiled code, it looks like a file is being written to `%AppData%\Microsoft\stomp.mp3`, because `onzo(0) = "AppData"` and `onzo(1) = "\Microsoft\stomp.mp3"`. If we look at the _P-code_, though, we see something different:
+"VBA stomping" refers to embedding macro "P-code" that does not match the macro's source code. The P-code is a set of instructions that will _actually_ be executed, so stomping can be used to mislead unsuspecting analysts.
+
+If we read the decompiled code, it looks like a file is being written to `%AppData%\Microsoft\stomp.mp3`, because `onzo(0) = "AppData"` and `onzo(1) = "\Microsoft\stomp.mp3"`. If we look at the _P-code_, though, we see something different:
 
 ```
 ' Line #66:
@@ -236,7 +242,7 @@ Turns out `olevba` was correct. If we read the decompiled code, it looks like a 
 
 `0x000B` is equal to 11. The macro is _actually_ calling `onzo(11)`, which returns `"\Microsoft\v.png"`.
 
-We could go on with analyzing the P-code to spot all the tricks, but there's a much easier alternative. We can use the [pcode2code](https://pypi.org/project/pcode2code/) tool, which will decompile the _P-code_ rather than the stomped VBA source.
+We could go on with analyzing the P-code to spot all the tricks, but there's a much easier alternative. We can use the [pcode2code](https://pypi.org/project/pcode2code/) tool, which will decompile the _P-code_ rather than just give us the stomped VBA source.
 
 ```bash
 $ pip install pcode2code
