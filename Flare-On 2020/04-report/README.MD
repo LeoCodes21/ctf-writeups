@@ -6,7 +6,7 @@ In this challenge we are presented with a single [Excel](https://www.microsoft.c
 
 ## Part 1 - Recon
 
-Since we're dealing with a document that has macros, we need to find a way to extract the underlying code. Specifically, we need to be able to access the document's [OLE](https://en.wikipedia.org/wiki/Object_Linking_and_Embedding) streams. OLE streams are essentially just embedded data, sort of like a `.zip` file. Enter [oledump](https://blog.didierstevens.com/programs/oledump-py/), a neat tool that allows us to extract these streams for analysis.
+Since we're dealing with a document that has macros, we need to find a way to extract the underlying code. Specifically, we need to be able to access the document's [OLE](https://en.wikipedia.org/wiki/Object_Linking_and_Embedding) streams. OLE streams are essentially just embedded data, sort of like files in a `.zip` archive. Enter [oledump](https://blog.didierstevens.com/programs/oledump-py/), a neat tool that allows us to extract these streams for analysis.
 
 Let's run it on the `report.xls` file and see what we get:
 ```
