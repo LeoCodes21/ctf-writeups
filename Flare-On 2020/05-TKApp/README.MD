@@ -149,53 +149,53 @@ dnSpy allows us to trace dataflow with its helpful **Analyzer**. If we select a 
 I've expanded the information for `set`, because it shows us the code locations that can _write_ to `Note`. One function appears: `SetupList` in the `TodoPage` class. The code for this function is shown below:
 
 ```cs
-		private void SetupList()
+private void SetupList()
+{
+	List<TodoPage.Todo> list = new List<TodoPage.Todo>();
+	if (!this.isHome)
+	{
+		list.Add(new TodoPage.Todo("go home", "and enable GPS", false));
+	}
+	else
+	{
+		TodoPage.Todo[] collection = new TodoPage.Todo[]
 		{
-			List<TodoPage.Todo> list = new List<TodoPage.Todo>();
-			if (!this.isHome)
-			{
-				list.Add(new TodoPage.Todo("go home", "and enable GPS", false));
-			}
-			else
-			{
-				TodoPage.Todo[] collection = new TodoPage.Todo[]
-				{
-					new TodoPage.Todo("hang out in tiger cage", "and survive", true),
-					new TodoPage.Todo("unload Walmart truck", "keep steaks for dinner", false),
-					new TodoPage.Todo("yell at staff", "maybe fire someone", false),
-					new TodoPage.Todo("say no to drugs", "unless it's a drinking day", false),
-					new TodoPage.Todo("listen to some tunes", "https://youtu.be/kTmZnQOfAF8", true)
-				};
-				list.AddRange(collection);
-			}
-			List<TodoPage.Todo> list2 = new List<TodoPage.Todo>();
-			foreach (TodoPage.Todo todo in list)
-			{
-				if (!todo.Done)
-				{
-					list2.Add(todo);
-				}
-			}
-			this.mylist.ItemsSource = list2;
-			App.Note = list2[0].Note;
-		}
-
-        ...
-        public class Todo
+			new TodoPage.Todo("hang out in tiger cage", "and survive", true),
+			new TodoPage.Todo("unload Walmart truck", "keep steaks for dinner", false),
+			new TodoPage.Todo("yell at staff", "maybe fire someone", false),
+			new TodoPage.Todo("say no to drugs", "unless it's a drinking day", false),
+			new TodoPage.Todo("listen to some tunes", "https://youtu.be/kTmZnQOfAF8", true)
+		};
+		list.AddRange(collection);
+	}
+	List<TodoPage.Todo> list2 = new List<TodoPage.Todo>();
+	foreach (TodoPage.Todo todo in list)
+	{
+		if (!todo.Done)
 		{
-			public string Name { get; set; }
-
-			public string Note { get; set; }
-
-			public bool Done { get; set; }
-
-			public Todo(string Name, string Note, bool Done)
-			{
-				this.Name = Name;
-				this.Note = Note;
-				this.Done = Done;
-			}
+			list2.Add(todo);
 		}
+	}
+	this.mylist.ItemsSource = list2;
+	App.Note = list2[0].Note;
+}
+
+...
+public class Todo
+{
+	public string Name { get; set; }
+
+	public string Note { get; set; }
+
+	public bool Done { get; set; }
+
+	public Todo(string Name, string Note, bool Done)
+	{
+		this.Name = Name;
+		this.Note = Note;
+		this.Done = Done;
+	}
+}
 ```
 
 This function sets `App.Note` to the `Note` field of the first todo entry that **isn't** completed. 
@@ -225,7 +225,7 @@ private void IndexPage_CurrentPageChanged(object sender, EventArgs e)
 			string desc;
 			if (exifReader.GetTagValue<string>(ExifTags.ImageDescription, out desc))
 			{
-				App.Desc = desc;
+		App.Desc = desc;
 			}
 			return;
 		}
@@ -307,67 +307,67 @@ Running this script prints `good`, so our values are correct.
 There's one more interesting function in `MainScreen`, and it's named `GetImage`. 
 
 ```cs
-		private bool GetImage(object sender, EventArgs e)
-		{
-			...
-			string text = new string(new char[]
-			{
-				App.Desc[2],
-				App.Password[6],
-				App.Password[4],
-				App.Note[4],
-				App.Note[0],
-				App.Note[17],
-				App.Note[18],
-				App.Note[16],
-				App.Note[11],
-				App.Note[13],
-				App.Note[12],
-				App.Note[15],
-				App.Step[4],
-				App.Password[6],
-				App.Desc[1],
-				App.Password[2],
-				App.Password[2],
-				App.Password[4],
-				App.Note[18],
-				App.Step[2],
-				App.Password[4],
-				App.Note[5],
-				App.Note[4],
-				App.Desc[0],
-				App.Desc[3],
-				App.Note[15],
-				App.Note[8],
-				App.Desc[4],
-				App.Desc[3],
-				App.Note[4],
-				App.Step[2],
-				App.Note[13],
-				App.Note[18],
-				App.Note[18],
-				App.Note[8],
-				App.Note[4],
-				App.Password[0],
-				App.Password[7],
-				App.Note[0],
-				App.Password[4],
-				App.Note[11],
-				App.Password[6],
-				App.Password[4],
-				App.Desc[4],
-				App.Desc[3]
-			});
-			byte[] key = SHA256.Create().ComputeHash(Encoding.ASCII.GetBytes(text));
-			byte[] bytes = Encoding.ASCII.GetBytes("NoSaltOfTheEarth");
-			try
-			{
-				App.ImgData = Convert.FromBase64String(Util.GetString(Runtime.Runtime_dll, key, bytes));
-				return true;
-			}
-            ...
-			return false;
-		}
+private bool GetImage(object sender, EventArgs e)
+{
+	...
+	string text = new string(new char[]
+	{
+		App.Desc[2],
+		App.Password[6],
+		App.Password[4],
+		App.Note[4],
+		App.Note[0],
+		App.Note[17],
+		App.Note[18],
+		App.Note[16],
+		App.Note[11],
+		App.Note[13],
+		App.Note[12],
+		App.Note[15],
+		App.Step[4],
+		App.Password[6],
+		App.Desc[1],
+		App.Password[2],
+		App.Password[2],
+		App.Password[4],
+		App.Note[18],
+		App.Step[2],
+		App.Password[4],
+		App.Note[5],
+		App.Note[4],
+		App.Desc[0],
+		App.Desc[3],
+		App.Note[15],
+		App.Note[8],
+		App.Desc[4],
+		App.Desc[3],
+		App.Note[4],
+		App.Step[2],
+		App.Note[13],
+		App.Note[18],
+		App.Note[18],
+		App.Note[8],
+		App.Note[4],
+		App.Password[0],
+		App.Password[7],
+		App.Note[0],
+		App.Password[4],
+		App.Note[11],
+		App.Password[6],
+		App.Password[4],
+		App.Desc[4],
+		App.Desc[3]
+	});
+	byte[] key = SHA256.Create().ComputeHash(Encoding.ASCII.GetBytes(text));
+	byte[] bytes = Encoding.ASCII.GetBytes("NoSaltOfTheEarth");
+	try
+	{
+		App.ImgData = Convert.FromBase64String(Util.GetString(Runtime.Runtime_dll, key, bytes));
+		return true;
+	}
+    ...
+	return false;
+}
 ```
 
 We can obtain the [data in Runtime.Runtime_dll](./Runtime_dll.bin) from dnSpy.
