@@ -206,7 +206,7 @@ The `xertz` array _appears_ to be initialized with references to columns in the 
 ' 	St xertz 
 ```
 
-`xertz` is _actually_ an array of `WORD`s (also known as `short`s.) This means the code should look more like:
+`xertz` is _actually_ an array of bytes (although items are stored as shorts.) This means the code should look more like:
 
 ```vb
     xertz = Array(0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE)
