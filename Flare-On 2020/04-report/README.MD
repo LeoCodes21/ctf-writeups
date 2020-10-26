@@ -176,7 +176,8 @@ Now that we've got _that_ out of the way, let's move on to the next interesting 
 
 ## Part 4 - Going down the wabbit hole
 
-This code is a perfect example of why you should _always_ double check the assembly (in this case, VBA P-code) before trusting decompilation. Can you spot the problem?
+This code is a perfect example of why you should _always_ double check the assembly (in this case, VBA P-code) before trusting decompilation.
+The problem is not obvious, and that's on purpose - let's figure it out.
 
 ```vb
     xertz = Array(&H11, &H22, &H33, &H44, &H55, &H66, &H77, &H88, &H99, &HAA, &HBB, &HCC, &HDD, &HEE)
@@ -187,42 +188,6 @@ This code is a perfect example of why you should _always_ double check the assem
       Put #fn, , wabbit
     Close #fn
 ```
-
-The `xertz` array _appears_ to be initialized with references to columns in the spreadsheet. However, studying the P-code reveals something different.
-
-```
-' Line #51:
-' 	LitHI2 0x0011 
-' 	LitHI2 0x0022 
-' 	LitHI2 0x0033 
-' 	LitHI2 0x0044 
-' 	LitHI2 0x0055 
-' 	LitHI2 0x0066 
-' 	LitHI2 0x0077 
-' 	LitHI2 0x0088 
-' 	LitHI2 0x0099 
-' 	LitHI2 0x00AA 
-' 	LitHI2 0x00BB 
-' 	LitHI2 0x00CC 
-' 	LitHI2 0x00DD 
-' 	LitHI2 0x00EE 
-' 	ArgsArray Array 0x000E 
-' 	St xertz 
-```
-
-`xertz` is _actually_ an array of bytes (although items are stored as shorts.) This means the code should look more like:
-
-```vb
-    xertz = Array(0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE)
-
-    wabbit = canoodle(F.T.Text, 0, 168667, xertz)
-    mf = Environ(rigmarole(onzo(0))) & rigmarole(onzo(1))
-    Open mf For Binary Lock Read Write As #fn
-      Put #fn, , wabbit
-    Close #fn
-```
-
-Also note that we can replace `mf` with `%AppData%\Microsoft\stomp.mp3`. At least... that's what the script _wants_ you to think.
 
 ### P-code stomping
 
