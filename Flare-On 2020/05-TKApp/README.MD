@@ -376,7 +376,7 @@ We can obtain the [data in Runtime.Runtime_dll](./Runtime_dll.bin) from dnSpy.
 
 ![Resource context menu](https://s.heyitsleo.io/ShareX/2020/10/b9a8GThGmd.png)
 
-`Util.GetString` is used to decrypt the data with the key (generated from our known values) and IV (`NoSaltOfTheEarth`). The cipher is in CBC mode and uses PKCS7 padding. The decrypted data is then Base64-decoded into a JPEG image. 
+`Util.GetString` is used to decrypt the data with the generated key (which is `the kind of challenges we are gonna make here`) and IV (`NoSaltOfTheEarth`). It uses the `RijndaelManaged` class, which defaults to working in CBC mode with PKCS7 padding. The decrypted data is then Base64-decoded, and finally interpreted as a JPEG image.
 
 \* **How do we know it's a JPEG?** The first 4 bytes of the Base64-decoded data are `ff d8 ff e0`, which is the marker of a JPEG in the JFIF format.
 
