@@ -42,6 +42,7 @@ IDA can now load the binary without any issues, allowing us to continue our expl
 ![IDA loaded it](https://s.heyitsleo.io/ShareX/2020/10/ida_j3IAVtPQHt.png)
 
 If we open the strings view (`SHIFT+F12`) we immediately see an "AutoIt" marker:
+
 ![AutoIt string](https://s.heyitsleo.io/ShareX/2020/10/ida_r8V52FIUgv.png)
 
 This confirms what we were told: the binary is a compiled AutoIt3 script. Where could the script be, though? We can close IDA and start looking.
