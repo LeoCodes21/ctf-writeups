@@ -63,7 +63,7 @@ Func gen_bmp_structs($width, $height, $_unused)
 EndFunc   
 Func gen_random_string($min_length, $max_length)
     Local $random_string = ""
-    For $flezmzowno = 0 To Random($min_length, $max_length, 1)
+    For $i = 0 To Random($min_length, $max_length, 1)
         $random_string &= Chr(Random(97, 122, 1))
     Next
     Return $random_string
@@ -82,14 +82,6 @@ Func drop_file_to_disk($file_type)
 EndFunc   
 Func get_computer_name()
     Return "aut01tfan1999"
-    ;~ Local $computer_name = -1
-    ;~ Local $data_GetComputerNameA = DllStructCreate("struct;dword;char[1024];endstruct")
-    ;~ DllStructSetData($data_GetComputerNameA, 1, 1024)
-    ;~ Local $result_GetComputerNameA = DllCall("kernel32.dll", "int", "GetComputerNameA", "ptr", DllStructGetPtr($data_GetComputerNameA, 2), "ptr", DllStructGetPtr($data_GetComputerNameA, 1))
-    ;~ If $result_GetComputerNameA[0] <> 0 Then
-    ;~     $computer_name = BinaryMid(DllStructGetData($data_GetComputerNameA, 2), 1, DllStructGetData($data_GetComputerNameA, 1))
-    ;~ EndIf
-    ;~ Return $computer_name
 EndFunc   
 GUICreate("CodeIt Plus!", 300, 375, -1, -1)
 Func generate_key_from_computername(ByRef $computer_name)
@@ -149,15 +141,15 @@ Func attempt_flag_decrypt(ByRef $qr_encoder_struct)
                             If $crypto_api_result[0] <> 0 Then
                                 $crypto_api_result = DllCall("advapi32.dll", "int", "CryptDecrypt", "ptr", DllStructGetData($crypto_ctx_struct, 2), "dword", 0, "dword", 1, "dword", 0, "ptr", DllStructGetPtr($crypto_ctx_struct, 4), "ptr", DllStructGetPtr($crypto_ctx_struct, 3))
                                 If $crypto_api_result[0] <> 0 Then
-                                    Local $flsekbkmru = BinaryMid(DllStructGetData($crypto_ctx_struct, 4), 1, DllStructGetData($crypto_ctx_struct, 3))
+                                    Local $decrypted_data = BinaryMid(DllStructGetData($crypto_ctx_struct, 4), 1, DllStructGetData($crypto_ctx_struct, 3))
                                     $validation_marker_1 = Binary("FLARE")
                                     $validation_marker_2 = Binary("ERALF")
-                                    $decrypted_marker_1 = BinaryMid($flsekbkmru, 1, BinaryLen($validation_marker_1))
-                                    $decrypted_marker_2 = BinaryMid($flsekbkmru, BinaryLen($flsekbkmru) - BinaryLen($validation_marker_2) + 1, BinaryLen($validation_marker_2))
+                                    $decrypted_marker_1 = BinaryMid($decrypted_data, 1, BinaryLen($validation_marker_1))
+                                    $decrypted_marker_2 = BinaryMid($decrypted_data, BinaryLen($decrypted_data) - BinaryLen($validation_marker_2) + 1, BinaryLen($validation_marker_2))
                                     If $validation_marker_1 = $decrypted_marker_1 And $validation_marker_2 = $decrypted_marker_2 Then
-                                        DllStructSetData($qr_encoder_struct, 1, BinaryMid($flsekbkmru, 6, 4))
-                                        DllStructSetData($qr_encoder_struct, 2, BinaryMid($flsekbkmru, 10, 4))
-                                        DllStructSetData($qr_encoder_struct, 3, BinaryMid($flsekbkmru, 14, BinaryLen($flsekbkmru) - 18))
+                                        DllStructSetData($qr_encoder_struct, 1, BinaryMid($decrypted_data, 6, 4))
+                                        DllStructSetData($qr_encoder_struct, 2, BinaryMid($decrypted_data, 10, 4))
+                                        DllStructSetData($qr_encoder_struct, 3, BinaryMid($decrypted_data, 14, BinaryLen($decrypted_data) - 18))
                                     EndIf
                                 EndIf
                                 DllCall("advapi32.dll", "int", "CryptDestroyKey", "ptr", DllStructGetData($crypto_ctx_struct, 2))

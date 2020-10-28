@@ -10,6 +10,7 @@
         "flyoojibbo": "min_length",
         "fltyapmigo": "max_length",
         "fldknagjpd": "random_string",
+        "flezmzowno": "i",
     
         "AREGFMWBSQD": "drop_file_to_disk",
         "flslbknofv": "file_type",
@@ -42,8 +43,8 @@
         "fluelrpeax": "crypto_ctx_struct",
         "flmtvyzrsy": "crypto_key",
         "flkpzlqkch": "crypted_blob",
-
         "fluzytjacb": "crypto_api_result",
+        "flsekbkmru": "decrypted_data",
         "flfzfsuaoz": "validation_marker_1",
         "fltvwqdotg": "validation_marker_2",
         "flgggftges": "decrypted_marker_1",
