@@ -211,9 +211,9 @@ At the end of `second_stage_code.bin`, there are more readable strings! The decr
 The second stage employs typical import obfuscation techniques. It resolves function pointers at runtime based on constant hashes. The hash algorithm used is a simple rotate-and-add hash, common in malware:
 
 ```py
-def hash(val):
+def hash(input):
     val = 0
-    for i in val:
+    for i in input:
         val = rol(val, 19, 32)
         val += ord(i)
     return val
